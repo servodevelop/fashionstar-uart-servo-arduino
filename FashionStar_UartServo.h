@@ -14,27 +14,26 @@
 #define FSUS_K_ANGLE_REAL2RAW 1
 #define FSUS_B_ANGLE_REAL2RAW 0
 #define FSUS_SERVO_SPEED 100.0 // 舵机角度的默认转速
-#define FSUS_ANGLE_CTL_DEADBLOCK 0.2 // 舵机控制的死区
-#define FSUS_WAIT_TIMEOUT_MS 100 // 等待的时间上限 ms
+#define FSUS_ANGLE_CTL_DEADBLOCK 2.0 // 舵机控制的死区
+#define FSUS_WAIT_TIMEOUT_MS 10000 // 等待的时间上限 ms
 
 class FSUS_Servo{
 public:
     FSUS_Protocol *protocol; // 舵机串口通信协议
     FSUS_SERVO_ID_T servoId; //舵机ID
     bool isOnline; //舵机是否在线
-
+    bool isMTurn; // 舵机是否是多圈模式
     float kAngleReal2Raw; // 舵机标定数据-舵机角度与位置之间的比例系数
     float bAngleReal2Raw; // 舵机标定数据-舵机角度与位置转换过程中的偏移量
     
     FSUS_SERVO_ANGLE_T curAngle; // 真实的当前角度
     FSUS_SERVO_ANGLE_T targetAngle; // 真实的目标角度
 
-    // FSUS_SERVO_ANGLE_T curRawAngle; // 原始的当前角度
-    // FSUS_SERVO_ANGLE_T targetRawAngle; // 原始的目标角度
+    FSUS_SERVO_ANGLE_T curRawAngle;     // 当前的原始角度
+    FSUS_SERVO_ANGLE_T targetRawAngle;  // 目标原始角度
     
     FSUS_SERVO_ANGLE_T angleMin; //舵机角度的最小值
     FSUS_SERVO_ANGLE_T angleMax; // 舵机角度最大值
-
     FSUS_SERVO_SPEED_T speed; // 舵机转速 单位dps °/s
     
     // 构造函数
@@ -55,6 +54,8 @@ public:
     FSUS_SERVO_ANGLE_T queryAngle();
     // 查询舵机原始的角度
     FSUS_SERVO_ANGLE_T queryRawAngle();
+    // 查询舵机的原始角度(多圈)
+    FSUS_SERVO_ANGLE_T queryRawAngleMTurn();
     // 范围是否合法
     bool isAngleLegal(FSUS_SERVO_ANGLE_T candiAngle);
     // 设置舵机的角度范围
@@ -69,6 +70,18 @@ public:
     void setRawAngle(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T interval, FSUS_POWER_T power);
     void setRawAngle(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T interval);
     void setRawAngle(FSUS_SERVO_ANGLE_T rawAngle);
+    // 设置舵机的原始角度(指定周期)
+    void setRawAngleByInterval(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T interval, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power);
+    // 设定舵机的原始角度(指定转速)
+    void setRawAngleByVelocity(FSUS_SERVO_ANGLE_T rawAngle, FSUS_SERVO_SPEED_T velocity, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power);
+    // 设定舵机的原始角度(多圈)
+    void setRawAngleMTurn(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T_MTURN interval, FSUS_POWER_T power);
+    void setRawAngleMTurn(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T_MTURN interval);
+    void setRawAngleMTurn(FSUS_SERVO_ANGLE_T rawAngle);
+    // 设定舵机的原始角度(多圈+指定周期)
+    void setRawAngleMTurnByInterval(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T_MTURN interval, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power);
+    // 设定舵机的原始角度(多圈+指定转速)
+    void setRawAngleMTurnByVelocity(FSUS_SERVO_ANGLE_T rawAngle, FSUS_SERVO_SPEED_T velocity, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power);
     // 查询舵机的电压(单位mV)
     uint16_t queryVoltage();
     // 查询舵机的电流(单位mA)

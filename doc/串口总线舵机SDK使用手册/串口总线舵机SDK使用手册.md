@@ -615,13 +615,12 @@ void FSUS_Servo::setAngleRange(FSUS_SERVO_ANGLE_T minAngle, FSUS_SERVO_ANGLE_T m
 
 ```cpp
 /* 
- * 设置舵机的角度
- * 让舵机在两个角度之间进行切换, 并动态的查询舵机的角度
+ * 设置舵机的角度(单圈模式)
  * 提示: 拓展板上电之后, 记得按下Arduino的RESET按键
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: xingshunkai@qq.com
- * 更新时间: 2020/04/23
+ * 更新时间: 2021/02/22
  */
 #include <SoftwareSerial.h>
 #include "FashionStar_UartServoProtocol.h"
@@ -640,40 +639,48 @@ SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
-// 等待舵机旋转到目标角度
-// 注: 在执行isStop的函数的时候, 本身就会查询当前舵机的角度
-void waitUntilStop(FSUS_Servo* uservo){
-    delay(1); //要等待一段时间才可以发送舵机角度查询的指令, 防止被覆盖.
-    while(true){
-        String message = "Servo Running, Angle = " + String(uservo->curAngle,1)+" Target Angle = "+String(uservo->targetAngle, 1);
-        softSerial.println(message);
-        if (uservo->isStop()){
-            break;
-        }
-    }
-    softSerial.println("Servo Stop, Angle = "+String(uservo->curAngle,1));
+unsigned int interval;  // 运行周期 单位ms 
+unsigned int t_acc;     // 加速时间 单位ms
+unsigned int t_dec;     // 减速时间 单位ms
+float velocity;         // 目标转速 单位°/s
+
+/* 等待并报告当前的角度*/
+void waitAndReport(){
+    uservo.wait();          // 等待舵机旋转到目标角度
+    softSerial.println("Real Angle = " + String(uservo.curRawAngle, 1) + " Target Angle = "+String(uservo.targetRawAngle, 1));
+    delay(2000); // 暂停2s
+
 }
 
 void setup(){
     softSerial.begin(SOFT_SERIAL_BAUDRATE); // 初始化软串口的波特率
     protocol.init(); // 通信协议初始化
     uservo.init(); //舵机角度初始化
-
     softSerial.println("Set Servo Angle");
-
 }
 
 void loop(){
     softSerial.println("Set Angle = 90°");
-    uservo.setAngle(90.0); // 设置舵机的角度
-    waitUntilStop(&uservo); // 等待舵机旋转到目标角度
-    // 暂停2s
-    delay(2000);
-    
+    uservo.setRawAngle(90.0);  // 设置舵机的角度
+    waitAndReport();
+
     softSerial.println("Set Angle = -90°");
-    uservo.setAngle(-90);
-    waitUntilStop(&uservo);
-    delay(2000);
+    uservo.setRawAngle(-90);
+    waitAndReport();
+
+    softSerial.println("Set Angle = 90° - Set Interval = 500ms");
+    interval = 1000;
+    t_acc = 100;
+    t_dec = 100;
+    uservo.setRawAngleByInterval(90, interval, t_acc, t_dec, 0);
+    waitAndReport();
+
+    softSerial.println("Set Angle = -90° - Set Velocity = 200°/s");
+    velocity = 200.0;
+    t_acc = 100;
+    t_dec = 100;
+    uservo.setRawAngleByVelocity(-90, velocity, t_acc, t_dec, 0);
+    waitAndReport();
 }
 ```
 
@@ -682,45 +689,14 @@ void loop(){
 **输出日志**
 
 ```
-Set Servo Angle
-
-Set Angle = 90
-
-Servo Running, Angle = -89.7 Target Angle = 90.0
-
-Servo Running, Angle = -83.6 Target Angle = 90.0
-
-Servo Running, Angle = -72.3 Target Angle = 90.0
-
-Servo Running, Angle = -62.3 Target Angle = 90.0
-
-Servo Running, Angle = -51.5 Target Angle = 90.0
-
-Servo Running, Angle = -40.7 Target Angle = 90.0
-
-Servo Running, Angle = -29.9 Target Angle = 90.0
-
-Servo Running, Angle = -18.6 Target Angle = 90.0
-
-Servo Running, Angle = -8.4 Target Angle = 90.0
-
-Servo Running, Angle = 2.0 Target Angle = 90.0
-
-Servo Running, Angle = 12.3 Target Angle = 90.0
-
-Servo Running, Angle = 22.8 Target Angle = 90.0
-
-Servo Running, Angle = 33.8 Target Angle = 90.0
-
-Servo Running, Angle = 44.1 Target Angle = 90.0
-
-Servo Running, Angle = 54.5 Target Angle = 90.0
-
-Servo Running, Angle = 65.2 Target Angle = 90.0
-
-Servo Running, Angle = 75.4 Target Angle = 90.0
-
-Servo Stop, Angle = 86.3
+Set Angle = 90°
+Real Angle = 89.7 Target Angle = 90.0
+Set Angle = -90°
+Real Angle = -89.6 Target Angle = -90.0
+Set Angle = 90° - Set Interval = 500ms
+Real Angle = 89.7 Target Angle = 90.0
+Set Angle = -90° - Set Velocity = 200°/s
+Real Angle = -89.6 Target Angle = -90.0
 ```
 
 
@@ -816,6 +792,16 @@ Real Angle = 89.80
 Set Angle = -90.0
 Real Angle = -89.00
 ```
+
+
+
+## 设置舵机角度-多圈模式
+
+
+
+
+
+### 例程源码
 
 
 

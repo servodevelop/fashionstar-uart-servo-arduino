@@ -31,22 +31,28 @@
 
 // FSUS控制指令数据
 // 注: 一下所有的指令都是针对单个舵机的
-#define FSUS_CMD_PING				0x01 // 舵机通讯检测
-#define FSUS_CMD_RESET_USER_DATA	0x02 // 重置用户数据
-#define FSUS_CMD_READ_DATA			0x03 // 单个舵机 读取数据库
-#define FSUS_CMD_WRITE_DATA			0x04 // 单个舵机 写入数据块
-#define FSUS_CMD_READ_BATCH_DATA	0x05 // 单个舵机 批次读取(读取一个舵机所有的数据)
-#define FSUS_CMD_WRITE_BATCH_DATA	0x06 // 单个舵机 批次写入(写入一个舵机所有的数据)
-#define FSUS_CMD_WHEEL				0x07 // 单个舵机 设置轮式模式
-#define FSUS_CMD_SET_ANGLE			0x08 // 角度控制模式(设置舵机的角度)) 
-#define FSUS_CMD_DAMPING			0x09 // 阻尼模式
-#define FSUS_CMD_QUERY_ANGLE		0x0a // 舵机角度读取
+#define FSUS_CMD_PING				1 // 舵机通讯检测
+#define FSUS_CMD_RESET_USER_DATA	2 // 重置用户数据
+#define FSUS_CMD_READ_DATA			3 // 单个舵机 读取数据库
+#define FSUS_CMD_WRITE_DATA			4 // 单个舵机 写入数据块
+#define FSUS_CMD_READ_BATCH_DATA	5 // 单个舵机 批次读取(读取一个舵机所有的数据)
+#define FSUS_CMD_WRITE_BATCH_DATA	6 // 单个舵机 批次写入(写入一个舵机所有的数据)
+#define FSUS_CMD_WHEEL				7 // 单个舵机 设置轮式模式
+#define FSUS_CMD_SET_ANGLE			8 // 角度控制模式(设置舵机的角度))
+#define FSUS_CMD_SET_ANGLE_BY_INTERVAL 11 // 设定角度(指定周期)
+#define FSUS_CMD_SET_ANGLE_BY_VELOCITY 12 // 设定转速(指定转速)
+#define FSUS_CMD_QUERY_ANGLE		10 // 舵机角度读取
+#define FSUS_CMD_SET_ANGLE_MTURN    13 // 设定角度(多圈)
+#define FSUS_CMD_SET_ANGLE_MTURN_BY_INTERVAL 14 // 设定角度(多圈+指定周期)
+#define FSUS_CMD_SET_ANGLE_MTURN_BY_VELOCITY 15 // 设定角度(多圈+指定转速)
+#define FSUS_CMD_QUERY_ANGLE_MTURN  16  // 查询角度多圈
+#define FSUS_CMD_DAMPING			9 // 阻尼模式
+
 
 // FSUS状态码
 #define FSUS_STATUS uint8_t
 #define FSUS_STATUS_SUCCESS 0 // 设置/读取成功
 #define FSUS_STATUS_FAIL 1 // 设置/读取失败
-
 #define FSUS_STATUS_WRONG_RESPONSE_HEADER 3 // 响应头不对
 #define FSUS_STATUS_UNKOWN_CMD_ID 4 // 未知的控制指令
 #define FSUS_STATUS_SIZE_TOO_BIG 5 // 参数的size大于FSUS_PACK_RESPONSE_MAX_SIZE里面的限制
@@ -54,9 +60,10 @@
 #define FSUS_STATUS_ID_NOT_MATCH 7 // 请求的舵机ID跟反馈回来的舵机ID不匹配
 #define FSUS_STATUS_TIMEOUT 8 // 等待超时
 
-
+// FSUS旋转方向
 #define FSUS_CCW 0 // 逆时针
 #define FSUS_CW 1  // 顺时针
+
 /* 用户只读区域 */
 
 /**
@@ -212,13 +219,15 @@
 #define FSUS_IS_RESPONSE_ON 0
 
 // 舵机角度范围
-#define FSUS_SERVO_ANGLE_MIN -135.0
-#define FSUS_SERVO_ANGLE_MAX 135.0
+#define FSUS_SERVO_ANGLE_MIN -180.0 // -135.0
+#define FSUS_SERVO_ANGLE_MAX 180.0  // 135.0
 
 typedef unsigned char FSUS_SERVO_ID_T; //舵机ID的格式
 typedef char* FSUS_SERVO_NAME_T; //舵机的名称
 typedef unsigned int FSUS_INTERVAL_T; //时间的格式
-typedef int FSUS_SERVO_POSITION_T; //舵机位置ADC采样数值格式
+typedef unsigned long FSUS_INTERVAL_T_MTURN; //时间的格式(多圈)
+typedef int FSUS_SERVO_POSITION_T; //舵机位置采样数值格式(2Bit)
+typedef long FSUS_SERVO_POSITION_T_MTURN; //舵机位置采样数值格式(多圈)(4Bit)
 typedef float FSUS_SERVO_ANGLE_T; //舵机角度的格式 [-135°, 135°]
 typedef float FSUS_SERVO_SPEED_T; //舵机转速的格式
 typedef unsigned int FSUS_POWER_T; //功率的格式 
@@ -274,14 +283,28 @@ public:
     FSUS_STATUS recvPing(FSUS_SERVO_ID_T *servoId, bool *isOnline);
     // 发送旋转的请求包
     void sendSetAngle(FSUS_SERVO_ID_T servoId, FSUS_SERVO_ANGLE_T angle,FSUS_INTERVAL_T interval,FSUS_POWER_T power);
-    // 发送阻尼模式
-    void sendDammping(FSUS_SERVO_ID_T servoId, FSUS_POWER_T power);
+    // 发送旋转的请求包(指定周期)
+    void sendSetAngleByInterval(FSUS_SERVO_ID_T servoId, FSUS_SERVO_ANGLE_T angle,FSUS_INTERVAL_T interval, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power);
+    // 发送旋转的请求包(指定转速)
+    void sendSetAngleByVelocity(FSUS_SERVO_ID_T servoId, FSUS_SERVO_ANGLE_T angle,FSUS_SERVO_SPEED_T velocity, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power);
     // 发送舵机角度查询指令
     void sendQueryAngle(FSUS_SERVO_ID_T servoId);
     // 接收角度查询指令
     FSUS_STATUS recvQueryAngle(FSUS_SERVO_ID_T *servoId, FSUS_SERVO_ANGLE_T *angle);
-    // 开启/关闭舵机扭力
-    // void sendTorqueEnable(FSUS_SERVO_ID_T *servoId, bool enable);
+    // 发送旋转的请求包(多圈)
+    void sendSetAngleMTurn(FSUS_SERVO_ID_T servoId, FSUS_SERVO_ANGLE_T angle,FSUS_INTERVAL_T_MTURN interval,FSUS_POWER_T power);
+    // 发送旋转的请求包(多圈+指定周期)
+    void sendSetAngleMTurnByInterval(FSUS_SERVO_ID_T servoId, FSUS_SERVO_ANGLE_T angle, FSUS_INTERVAL_T_MTURN interval, \
+        FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power);
+    // 发送旋转的请求包(多圈+指定转速)
+    void sendSetAngleMTurnByVelocity(FSUS_SERVO_ID_T servoId, FSUS_SERVO_ANGLE_T angle, FSUS_SERVO_SPEED_T velocity, \
+        FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power);
+    // 发送舵机角度查询指令
+    void sendQueryAngleMTurn(FSUS_SERVO_ID_T servoId);
+    // 接收角度查询指令(多圈模式)
+    FSUS_STATUS recvQueryAngleMTurn(FSUS_SERVO_ID_T *servoId, FSUS_SERVO_ANGLE_T *angle);
+    // 发送阻尼模式
+    void sendDammping(FSUS_SERVO_ID_T servoId, FSUS_POWER_T power);
     // 轮式控制模式
     void sendWheelMove(FSUS_SERVO_ID_T servoId, uint8_t method, uint16_t speed, uint16_t value);
     // 轮子停止转动
@@ -304,6 +327,5 @@ public:
     void sendWriteData(FSUS_SERVO_ID_T servoId, uint8_t address, uint8_t contentLen, uint8_t *content);
     // 接收数据写入指令
     FSUS_STATUS recvWriteData(FSUS_SERVO_ID_T *servoId, uint8_t *address, bool *result);
-    
 };
 #endif
