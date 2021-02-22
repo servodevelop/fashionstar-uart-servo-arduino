@@ -100,7 +100,7 @@ FSUS_STATUS FSUS_Protocol::recvPack(){
             // 载入cmdId
             responsePack.cmdId = curByte;
             // 检查cmdId是否满足指令范围
-            if(responsePack.cmdId > 10){
+            if(responsePack.cmdId > FSUS_CMD_NUM){
                 return FSUS_STATUS_UNKOWN_CMD_ID;
             }
         }else if (curIdx==3){

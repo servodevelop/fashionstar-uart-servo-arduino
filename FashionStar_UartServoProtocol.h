@@ -31,6 +31,7 @@
 
 // FSUS控制指令数据
 // 注: 一下所有的指令都是针对单个舵机的
+#define FSUS_CMD_NUM 16
 #define FSUS_CMD_PING				1 // 舵机通讯检测
 #define FSUS_CMD_RESET_USER_DATA	2 // 重置用户数据
 #define FSUS_CMD_READ_DATA			3 // 单个舵机 读取数据库

@@ -552,19 +552,69 @@ void loop(){
 **函数原型**
 
 ```cpp
-void FSUS_Servo::setAngle(FSUS_SERVO_ANGLE_T angle)
+/* 设置舵机的原始角度 */
+void FSUS_Servo::setRawAngle(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T interval, FSUS_POWER_T power)
 ```
 
 ```cpp
-void FSUS_Servo::setAngle(FSUS_SERVO_ANGLE_T angle, FSUS_INTERVAL_T interval)
+/* 设置舵机的原始角度 */
+void FSUS_Servo::setRawAngle(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T interval)
+```
+
+```cpp
+/* 设置舵机的原始角度 */
+void FSUS_Servo::setRawAngle(FSUS_SERVO_ANGLE_T rawAngle)
 ```
 
 
 
 **输入参数**
 
-* `angle` : 舵机的目标角度，单位 °
+* `rawAngle` : 舵机的目标角度，单位 °
 * `interval` 舵机旋转的周期, 单位ms
+* `power` 最大功率, 单位mW
+
+
+
+### API-`setRawAngleByInterval`
+
+函数原型
+
+```c++
+// 设置舵机的原始角度(指定周期)
+void FSUS_Servo::setRawAngleByInterval(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T interval, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power)
+```
+
+
+
+**输入参数**
+
+* `rawAngle` : 舵机的目标角度，单位 °
+* `interval`：  舵机旋转的周期, 单位ms
+* `t_acc` : 加速时间
+* `t_dec`: 减速时间
+* `power` ：最大功率, 单位mW
+
+
+
+### API-`setRawAngleByVelocity`
+
+函数原型
+
+```c++
+// 设定舵机的原始角度(指定转速)
+void FSUS_Servo::setRawAngleByVelocity(FSUS_SERVO_ANGLE_T rawAngle, FSUS_SERVO_SPEED_T velocity, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power)
+```
+
+
+
+**输入参数**
+
+* `rawAngle` : 舵机的目标角度，单位 °
+* `velocity`：  舵机旋转的转速, 单位°/s
+* `t_acc` : 加速时间
+* `t_dec`: 减速时间
+* `power` ：最大功率, 单位mW
 
 
 
@@ -589,6 +639,8 @@ bool FSUS_Servo::isStop()
 * `is_stop`: 
   * `true` 舵机已经到达目标角度, 停下来了
   * `false` 舵机还没有到达目标角度,正在旋转
+
+
 
 ### API-`setRange`
 
@@ -799,9 +851,181 @@ Real Angle = -89.00
 
 
 
+### API-`setRawAngleMTurn`
+
+函数原型
+
+```cpp
+// 设定舵机的原始角度(多圈)
+void FSUS_Servo::setRawAngleMTurn(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T_MTURN interval, FSUS_POWER_T power)
+```
+
+```c++
+// 设定舵机的原始角度(多圈)
+void FSUS_Servo::setRawAngleMTurn(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T_MTURN interval)
+```
+
+```c++
+// 设定舵机的原始角度(多圈)
+void FSUS_Servo::setRawAngleMTurn(FSUS_SERVO_ANGLE_T rawAngle)
+```
+
+**输入参数**
+
+* `rawAngle` : 舵机的目标角度，单位 °
+* `interval` 舵机旋转的周期, 单位ms
+* `power` 最大功率，单位mW
+
+**输出参数**
+
+<无>
+
+
+
+### API-`setRawAngleByInterval`
+
+函数原型
+
+```c++
+// 设定舵机的原始角度(多圈+指定周期)
+void FSUS_Servo::setRawAngleMTurnByInterval(FSUS_SERVO_ANGLE_T rawAngle, FSUS_INTERVAL_T_MTURN interval, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power)
+```
+
+**输入参数**
+
+* `rawAngle` : 舵机的目标角度，单位 °
+* `interval` 舵机旋转的周期, 单位ms
+* `t_acc` 加速时间，单位ms
+* `t_dec` 减速时间，单位ms
+* `power` 最大功率，单位mW
+
+**输出参数**
+
+<无>
+
+
+
+
+
+### API-`setRawAngleMTurnByVelocity`
+
+函数原型
+
+```cpp
+// 设定舵机的原始角度(多圈+指定转速)
+void FSUS_Servo::setRawAngleMTurnByVelocity(FSUS_SERVO_ANGLE_T rawAngle, FSUS_SERVO_SPEED_T velocity, FSUS_INTERVAL_T t_acc, FSUS_INTERVAL_T t_dec, FSUS_POWER_T power)
+```
+
+
+
+**输入参数**
+
+* `rawAngle` : 舵机的目标角度，单位 °
+* `velocity` ：舵机旋转的速度，单位°/s
+* `t_acc` ： 加速时间，单位ms
+* `t_dec` ： 减速时间，单位ms
+* `power` ： 最大功率，单位mW
+
+**输出参数**
+
+<无>
+
+
+
+
+
 
 
 ### 例程源码
+
+`servo_set_angle_mturn.ino`
+
+```c++
+/* 
+ * 设置舵机的角度(多圈模式)
+ * 提示: 拓展板上电之后, 记得按下Arduino的RESET按键
+ * --------------------------
+ * 作者: 阿凯|Kyle
+ * 邮箱: xingshunkai@qq.com
+ * 更新时间: 2021/02/22
+ */
+#include <SoftwareSerial.h>
+#include "FashionStar_UartServoProtocol.h"
+#include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
+
+// 软串口的配置
+#define SOFT_SERIAL_RX 6
+#define SOFT_SERIAL_TX 7
+#define SOFT_SERIAL_BAUDRATE 4800
+
+// 配置参数
+#define BAUDRATE 115200 // 波特率
+#define SERVO_ID 0 //舵机ID号
+
+SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+FSUS_Protocol protocol(BAUDRATE); //协议
+FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
+
+unsigned long interval;  // 运行周期 单位ms 
+unsigned int t_acc;     // 加速时间 单位ms
+unsigned int t_dec;     // 减速时间 单位ms
+float velocity;         // 目标转速 单位°/s
+
+/* 等待并报告当前的角度*/
+void waitAndReport(){
+    uservo.wait();          // 等待舵机旋转到目标角度
+    softSerial.println("Real Angle = " + String(uservo.curRawAngle, 1) + " Target Angle = "+String(uservo.targetRawAngle, 1));
+    delay(2000); // 暂停2s
+}
+
+void setup(){
+    softSerial.begin(SOFT_SERIAL_BAUDRATE); // 初始化软串口的波特率
+    protocol.init(); // 通信协议初始化
+    uservo.init(); //舵机角度初始化
+    softSerial.println("Set Servo Angle");
+}
+
+void loop(){
+    softSerial.println("Set Angle = 900°");
+    uservo.setRawAngleMTurn(900.0);  // 设置舵机的角度
+    waitAndReport();
+
+    softSerial.println("Set Angle = -900.0°");
+    uservo.setRawAngleMTurn(-900.0);
+    waitAndReport();
+
+    softSerial.println("Set Angle = 900° - Set Interval = 10s");
+    interval = 10000;
+    t_acc = 100;
+    t_dec = 100;
+    uservo.setRawAngleMTurnByInterval(900, interval, t_acc, t_dec, 0);
+    waitAndReport();
+
+    softSerial.println("Set Angle = -900° - Set Velocity = 200°/s");
+    velocity = 200.0;
+    t_acc = 100;
+    t_dec = 100;
+    uservo.setRawAngleMTurnByVelocity(-900, velocity, t_acc, t_dec, 0);
+    waitAndReport();
+}
+```
+
+
+
+**输出日志**
+
+```
+Set Angle = 900°
+Set Servo Angle
+Set Angle = 900°
+Real Angle = 899.0 Target Angle = 900.0
+Set Angle = -900.0°
+Real Angle = -899.0 Target Angle = -900.0
+Set Angle = 900° - Set Interval = 10s
+Real Angle = 899.0 Target Angle = 900.0
+Set Angle = -900° - Set Velocity = 200°/s
+Real Angle = -899.0 Target Angle = -900.0
+```
 
 
 

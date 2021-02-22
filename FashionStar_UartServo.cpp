@@ -119,6 +119,7 @@ void FSUS_Servo::setAngle(FSUS_SERVO_ANGLE_T angle, FSUS_INTERVAL_T interval){
     setRawAngle(angleReal2Raw(this->targetAngle), interval);
 }
 
+/* 设置舵机角度 */
 void FSUS_Servo::setAngle(FSUS_SERVO_ANGLE_T angle, FSUS_INTERVAL_T interval, FSUS_POWER_T power){
     // 约束角度的范围
     angle = (angle < this->angleMin) ? this->angleMin: angle;
@@ -341,7 +342,7 @@ bool FSUS_Servo::isStop(){
         // 舵机角度查询失败
         return false;
     }
-    
+
     return abs(this->curRawAngle - this->targetRawAngle) <= FSUS_ANGLE_CTL_DEADBLOCK;
 }
 
