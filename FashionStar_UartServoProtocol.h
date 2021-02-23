@@ -49,7 +49,6 @@
 #define FSUS_CMD_QUERY_ANGLE_MTURN  16  // 查询角度多圈
 #define FSUS_CMD_DAMPING			9 // 阻尼模式
 
-
 // FSUS状态码
 #define FSUS_STATUS uint8_t
 #define FSUS_STATUS_SUCCESS 0 // 设置/读取成功
