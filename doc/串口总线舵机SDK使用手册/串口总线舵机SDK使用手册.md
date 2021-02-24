@@ -4,7 +4,7 @@
 
 作者: 阿凯|Kyle
 
-邮箱: xingshunkai@qq.com
+邮箱: kyle.xing@fashionstar.com.hk
 
 更新时间: 2020 / 04 / 23
 
@@ -153,7 +153,7 @@ bool isOnline = uservo.ping(); // 舵机通讯检测
  * 舵机通讯检测
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2020/04/23
  **/
 #include <SoftwareSerial.h>
@@ -249,7 +249,7 @@ uservo.setDamping(DAMPING_POWER);
  * 调整参数`DAMPING_POWER`感受不同的阻尼力
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2020/04/23
  **/
 #include <SoftwareSerial.h>
@@ -340,7 +340,7 @@ uservo.curAngle
  * 用手掰动舵机, 角度回读并将角度读数通过SPI发送
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2020/04/23
  **/
 #include <SoftwareSerial.h>
@@ -478,7 +478,7 @@ void FSUS_Servo::wheelRunNCircle(uint8_t is_cw, uint16_t circle_num)
  * 提示: 拓展板上电之后, 记得按下Arduino的RESET按键
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2020/07/6
  */
 #include "FashionStar_UartServoProtocol.h"
@@ -671,7 +671,7 @@ void FSUS_Servo::setAngleRange(FSUS_SERVO_ANGLE_T minAngle, FSUS_SERVO_ANGLE_T m
  * 提示: 拓展板上电之后, 记得按下Arduino的RESET按键
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2021/02/22
  */
 #include <SoftwareSerial.h>
@@ -783,7 +783,7 @@ void FSUS_Servo::wait()
  * 提示: 拓展板上电之后, 记得按下Arduino的RESET按键
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2020/04/23
  */
 #include <SoftwareSerial.h>
@@ -946,7 +946,7 @@ void FSUS_Servo::setRawAngleMTurnByVelocity(FSUS_SERVO_ANGLE_T rawAngle, FSUS_SE
  * 提示: 拓展板上电之后, 记得按下Arduino的RESET按键
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2021/02/22
  */
 #include <SoftwareSerial.h>
@@ -1063,7 +1063,7 @@ uservo.setTorque(true); // 开启扭力
  * 提示: 拓展板上电之后, 记得按下Arduino的RESET按键
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2020/04/23
  */
 #include "FashionStar_UartServoProtocol.h"
@@ -1206,7 +1206,7 @@ FSUS_SERVO_ANGLE_T FSUS_Servo::angleRaw2Real(FSUS_SERVO_ANGLE_T rawAngle);
  * 提示: 拓展板上电之后, 记得按下Arduino的RESET按键
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2020/04/23
  */
 
@@ -1313,7 +1313,7 @@ void FSUS_Servo::setSpeed(FSUS_SERVO_SPEED_T speed)
  * 舵机数据读取实验
  * --------------------------
  * 作者: 阿凯|Kyle
- * 邮箱: xingshunkai@qq.com
+ * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2020/11/14
  **/
 #include <SoftwareSerial.h>
