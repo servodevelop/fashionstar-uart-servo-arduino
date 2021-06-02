@@ -6,20 +6,27 @@
  * 邮箱: kyle.xing@fashionstar.com.hk
  * 更新时间: 2021/02/22
  */
+#if defined(ARDUINO_ARCH_AVR)
 #include <SoftwareSerial.h>
+#endif
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
+// 串口总线舵机配置参数
+#define BAUDRATE 115200 // 波特率
+#define SERVO_ID 0 //舵机ID号
+
+#if defined(ARDUINO_ARCH_AVR)
 // 软串口的配置
 #define SOFT_SERIAL_RX 6
 #define SOFT_SERIAL_TX 7
 #define SOFT_SERIAL_BAUDRATE 4800
-
-// 配置参数
-#define BAUDRATE 115200 // 波特率
-#define SERVO_ID 0 //舵机ID号
-
 SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+#elif defined(ARDUINO_ARCH_ESP32)
+#define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
+
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 

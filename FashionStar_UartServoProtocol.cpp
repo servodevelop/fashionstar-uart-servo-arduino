@@ -16,19 +16,42 @@ FSUS_Protocol::FSUS_Protocol(){
 }
 
 void FSUS_Protocol::init(){
+#if defined(ARDUINO_ARCH_AVR)
     Serial.begin(baudrate); // 设置波特率
     this->serial = &Serial; // 硬件串口指针
+#elif defined(ARDUINO_ARCH_ESP32)
+    // Serial2初始化
+    // API Serial2.begin(baud-rate, protocol, RX pin, TX pin);
+    Serial2.begin(baudrate);
+    this->serial = &Serial2;
+#else
+#error "This library only supports boards with an AVR, ESP32."
+#endif
 }
 
 void FSUS_Protocol::init(unsigned long baudrate){
     this->baudrate = baudrate;
+#if defined(ARDUINO_ARCH_AVR)
     Serial.begin(this->baudrate);
     this->serial = &Serial;
+#elif defined(ARDUINO_ARCH_ESP32)
+    Serial2.begin(baudrate);
+    this->serial = &Serial2;
+
+    // HardwareSerial uservo_serial(2);
+    // uservo_serial.begin(baudrate);
+    // this->serial = &uservo_serial;
+#endif
+
 }
 
 void FSUS_Protocol::init(Stream * serial, unsigned long baudrate){
     this->baudrate = baudrate;
+#if defined(ARDUINO_ARCH_AVR)
     Serial.begin(this->baudrate);
+#elif defined(ARDUINO_ARCH_ESP32)
+    Serial2.begin(this->baudrate);
+#endif
     this->serial = serial;
 }
 
@@ -163,6 +186,7 @@ void FSUS_Protocol::sendPing(FSUS_SERVO_ID_T servoId){
 FSUS_STATUS FSUS_Protocol::recvPing(FSUS_SERVO_ID_T* servoId, bool *isOnline){
     // 接收数据帧
     FSUS_STATUS status = recvPack();
+    
     *servoId = responsePack.content[0]; // 提取舵机ID
     *isOnline = (status == FSUS_STATUS_SUCCESS);
     responsePack.recv_status = status;
