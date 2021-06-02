@@ -194,7 +194,7 @@ void FSUS_Protocol::sendSetAngle(FSUS_SERVO_ID_T servoId, FSUS_SERVO_ANGLE_T ang
     requestPack.cmdId = FSUS_CMD_SET_ANGLE; // 指令ID
     requestPack.content_size = 7; // 内容长度
     requestPack.content[0]=servoId; //舵机ID
-    int angle_int = angle * 10; //舵机的角度
+    int16_t angle_int = angle * 10; //舵机的角度
     requestPack.content[1] = angle_int & 0xFF;
     requestPack.content[2] = angle_int >> 8;
     requestPack.content[3] = interval & 0xFF; //周期
@@ -209,7 +209,7 @@ void FSUS_Protocol::sendSetAngleByInterval(FSUS_SERVO_ID_T servoId, FSUS_SERVO_A
     requestPack.cmdId = FSUS_CMD_SET_ANGLE_BY_INTERVAL; // 指令ID
     requestPack.content_size = 11; // 内容长度
     requestPack.content[0]=servoId; //舵机ID
-    int angle_int = angle * 10; //舵机的角度
+    int16_t angle_int = angle * 10; //舵机的角度
     requestPack.content[1] = angle_int & 0xFF;
     requestPack.content[2] = angle_int >> 8;
     requestPack.content[3] = interval & 0xFF; //周期
@@ -228,8 +228,8 @@ void FSUS_Protocol::sendSetAngleByVelocity(FSUS_SERVO_ID_T servoId, FSUS_SERVO_A
     requestPack.cmdId = FSUS_CMD_SET_ANGLE_BY_VELOCITY; // 指令ID
     requestPack.content_size = 11;           // 内容长度
     requestPack.content[0]=servoId;         //舵机ID
-    int angle_int = angle * 10;             //舵机的角度
-    unsigned int velocity_int = velocity * 10; // 转速 
+    int16_t angle_int = angle * 10;             //舵机的角度
+    uint16_t velocity_int = velocity * 10; // 转速 
     requestPack.content[1] = angle_int & 0xFF;
     requestPack.content[2] = angle_int >> 8;
     requestPack.content[3] = velocity_int & 0xFF; //周期
@@ -254,7 +254,6 @@ void FSUS_Protocol::sendQueryAngle(FSUS_SERVO_ID_T servoId){
 // 接收角度查询指令
 FSUS_STATUS FSUS_Protocol::recvQueryAngle(FSUS_SERVO_ID_T *servoId, FSUS_SERVO_ANGLE_T *angle){
     FSUS_STATUS status = recvPack();
-    // int angleVal;
     int16_t angleVal;
     byte* angleValPtr = (byte*)&angleVal;
     
@@ -333,7 +332,7 @@ void FSUS_Protocol::sendSetAngleMTurnByVelocity(FSUS_SERVO_ID_T servoId, FSUS_SE
     requestPack.content_size = 13;             // 内容长度
     requestPack.content[0]=servoId;            //舵机ID
     long angle_long = angle * 10;              //舵机的角度
-    unsigned int velocity_int = velocity * 10; // 舵机转速 单位0.1°/s
+    uint16_t velocity_int = velocity * 10; // 舵机转速 单位0.1°/s
     // 角度
     requestPack.content[1] = angle_long & 0xFF;
     requestPack.content[2] = (angle_long >> 8) & 0xFF;
