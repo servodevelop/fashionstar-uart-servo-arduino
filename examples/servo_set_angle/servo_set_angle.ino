@@ -4,7 +4,7 @@
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2021/02/22
+ * 更新时间: 2021/06/02
  */
 
 #include "FashionStar_UartServoProtocol.h"

@@ -4,7 +4,7 @@
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/07/23
+ * 更新时间: 2021/06/02
  */
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
