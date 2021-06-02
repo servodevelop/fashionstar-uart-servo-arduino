@@ -14,7 +14,6 @@
 #define SERVO_ID 0 //舵机ID号
 #define BAUDRATE 115200 // 波特率
 
-
 // 调试串口的配置
 #if defined(ARDUINO_ARCH_AVR)
 #include <SoftwareSerial.h>
