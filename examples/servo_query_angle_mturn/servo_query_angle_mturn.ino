@@ -1,5 +1,5 @@
 /*
- * 舵机角度回读实验
+ * 舵机角度回读实验(多圈模式)
  * 用手掰动舵机, 角度回读并将角度读数通过SPI发送
  * --------------------------
  * 作者: 阿凯|Kyle
@@ -44,7 +44,7 @@ void setup(){
 
 void loop(){
     // 舵机角度查询 (更新角度)
-    uservo.queryRawAngle(); 
+    uservo.queryRawAngleMTurn(); 
     // 日志输出
     String message = "Status Code: " + String(uservo.protocol->responsePack.recv_status, DEC) + " servo #"+String(uservo.servoId, DEC) + " , Current Angle = "+String(uservo.curRawAngle, 1)+" deg";
     DEBUG_SERIAL.println(message);

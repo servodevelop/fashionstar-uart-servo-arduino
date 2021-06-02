@@ -691,9 +691,9 @@ SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
-unsigned int interval;  // 运行周期 单位ms 
-unsigned int t_acc;     // 加速时间 单位ms
-unsigned int t_dec;     // 减速时间 单位ms
+uint16_t interval;  // 运行周期 单位ms 
+uint16_t t_acc;     // 加速时间 单位ms
+uint16_t t_dec;     // 减速时间 单位ms
 float velocity;         // 目标转速 单位°/s
 
 /* 等待并报告当前的角度*/
@@ -966,9 +966,9 @@ SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
-unsigned long interval;  // 运行周期 单位ms 
-unsigned int t_acc;     // 加速时间 单位ms
-unsigned int t_dec;     // 减速时间 单位ms
+uint32_t interval;  // 运行周期 单位ms 
+uint16_t t_acc;     // 加速时间 单位ms
+uint16_t t_dec;     // 减速时间 单位ms
 float velocity;         // 目标转速 单位°/s
 
 /* 等待并报告当前的角度*/

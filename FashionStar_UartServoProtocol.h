@@ -224,14 +224,14 @@
 
 typedef unsigned char FSUS_SERVO_ID_T; //舵机ID的格式
 typedef char* FSUS_SERVO_NAME_T; //舵机的名称
-typedef unsigned int FSUS_INTERVAL_T; //时间的格式
-typedef unsigned long FSUS_INTERVAL_T_MTURN; //时间的格式(多圈)
-typedef int FSUS_SERVO_POSITION_T; //舵机位置采样数值格式(2Bit)
-typedef long FSUS_SERVO_POSITION_T_MTURN; //舵机位置采样数值格式(多圈)(4Bit)
+typedef uint16_t FSUS_INTERVAL_T; //时间的格式
+typedef uint32_t FSUS_INTERVAL_T_MTURN; //时间的格式(多圈)
+typedef uint16_t FSUS_SERVO_POSITION_T; //舵机位置采样数值格式(2Bit)
+typedef int32_t FSUS_SERVO_POSITION_T_MTURN; //舵机位置采样数值格式(多圈)(4Bit)
 typedef float FSUS_SERVO_ANGLE_T; //舵机角度的格式 [-135°, 135°]
 typedef float FSUS_SERVO_SPEED_T; //舵机转速的格式
-typedef unsigned int FSUS_POWER_T; //功率的格式 
-typedef unsigned int FSUS_HEADER_T; //帧头
+typedef uint16_t FSUS_POWER_T; //功率的格式 
+typedef uint16_t FSUS_HEADER_T; //帧头
 typedef unsigned char FSUS_PACKAGE_SIZE_T; //Package的长度格式
 // typedef unsigned char FSUS_CHECKSUM_T; // 校验和的数据类型
 typedef byte FSUS_CHECKSUM_T; // 校验和的数据类型
@@ -252,18 +252,18 @@ typedef struct{
 // 串口通信舵机通信协议
 class FSUS_Protocol{
 public: 
-    unsigned long baudrate; //串口通信的波特率
+    uint32_t baudrate; //串口通信的波特率
     // HardwareSerial *serial; //串口
     Stream *serial;
     //请求数据缓冲区
     FSUS_PACKAGE_T requestPack;
     //发送数据的缓冲区
     FSUS_PACKAGE_T responsePack;
-    FSUS_Protocol(unsigned long baudrate);
+    FSUS_Protocol(uint32_t baudrate);
     FSUS_Protocol();
     void init(); // 资源初始化
-    void init(unsigned long baudrate);
-    void init(Stream * serial, unsigned long baudrate);
+    void init(uint32_t baudrate);
+    void init(Stream * serial, uint32_t baudrate);
     //串口总线舵机底层的通信协议相关的函数
     //加工并发送请求数据包
     void sendPack();

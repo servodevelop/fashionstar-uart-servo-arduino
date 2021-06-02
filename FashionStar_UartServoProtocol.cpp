@@ -7,7 +7,7 @@
  */
 #include "FashionStar_UartServoProtocol.h"
 
-FSUS_Protocol::FSUS_Protocol(unsigned long baudrate){
+FSUS_Protocol::FSUS_Protocol(uint32_t baudrate){
     this->baudrate = baudrate;
 }
 
@@ -29,7 +29,7 @@ void FSUS_Protocol::init(){
 #endif
 }
 
-void FSUS_Protocol::init(unsigned long baudrate){
+void FSUS_Protocol::init(uint32_t baudrate){
     this->baudrate = baudrate;
 #if defined(ARDUINO_ARCH_AVR)
     Serial.begin(this->baudrate);
@@ -41,7 +41,7 @@ void FSUS_Protocol::init(unsigned long baudrate){
 
 }
 
-void FSUS_Protocol::init(Stream * serial, unsigned long baudrate){
+void FSUS_Protocol::init(Stream * serial, uint32_t baudrate){
     this->baudrate = baudrate;
 #if defined(ARDUINO_ARCH_AVR)
     Serial.begin(this->baudrate);
@@ -63,7 +63,7 @@ void FSUS_Protocol::sendPack(){
     serial->write(requestPack.header >> 8);
     serial->write(requestPack.cmdId);
     serial->write(requestPack.content_size);
-    for(int i=0; i<requestPack.content_size; i++){
+    for(uint16_t i=0; i<requestPack.content_size; i++){
         serial->write(requestPack.content[i]);
     }
     serial->write(requestPack.checksum);
@@ -89,7 +89,7 @@ void FSUS_Protocol::initResponsePack(){
 
 //接收响应包 
 FSUS_STATUS FSUS_Protocol::recvPack(){
-    unsigned long start_time = millis();
+    uint32_t start_time = millis();
     
     // responsePack.recv_status = 0; //重置标志位
     responsePack.recv_cnt = 0; // 数据帧接收标志位
@@ -153,12 +153,12 @@ FSUS_STATUS FSUS_Protocol::recvPack(){
 //计算CRC校验码
 FSUS_CHECKSUM_T FSUS_Protocol::calcPackChecksum(const FSUS_PACKAGE_T *package){
     // uint16_t checksum = 0;
-    int checksum = 0;
+    uint16_t checksum = 0;
     checksum += (package->header & 0xFF);
     checksum += (package->header >> 8);
     checksum += package->cmdId;
     checksum += package->content_size;
-    for(int i=0; i<package->content_size; i++){
+    for(uint16_t i=0; i<package->content_size; i++){
         checksum += package->content[i];
     }
     
@@ -262,11 +262,10 @@ FSUS_STATUS FSUS_Protocol::recvQueryAngle(FSUS_SERVO_ID_T *servoId, FSUS_SERVO_A
     // 偶尔会出现校验和错误的情况, 临时允许
     if(status == FSUS_STATUS_SUCCESS || status==FSUS_STATUS_CHECKSUM_ERROR){
         (*servoId) = responsePack.content[0];
-        
         angleValPtr[0] = responsePack.content[1];
         angleValPtr[1] = responsePack.content[2];
-        (*angle) = 0.1f*angleVal;
-        // (*angle) = 0.1 * (int)(responsePack.content[1] | responsePack.content[2]<< 8);
+        (*angle) = 0.1*(float)angleVal;
+        // (*angle) = 0.1 * (uint16_t)(responsePack.content[1] | responsePack.content[2]<< 8);
     }
     responsePack.recv_status = status;
     return status;
@@ -277,7 +276,7 @@ void FSUS_Protocol::sendSetAngleMTurn(FSUS_SERVO_ID_T servoId, FSUS_SERVO_ANGLE_
     requestPack.cmdId = FSUS_CMD_SET_ANGLE_MTURN; // 指令ID
     requestPack.content_size = 11; // 内容长度
     requestPack.content[0]=servoId; //舵机ID
-    long angle_long = angle * 10; //舵机的角度
+    int32_t angle_long = angle * 10; //舵机的角度
     // 角度
     requestPack.content[1] = angle_long & 0xFF;
     requestPack.content[2] = (angle_long >> 8) & 0xFF;
@@ -301,7 +300,7 @@ void FSUS_Protocol::sendSetAngleMTurnByInterval(FSUS_SERVO_ID_T servoId, FSUS_SE
     requestPack.cmdId = FSUS_CMD_SET_ANGLE_MTURN_BY_INTERVAL; // 指令ID
     requestPack.content_size = 15; // 内容长度
     requestPack.content[0]=servoId; //舵机ID
-    long angle_long = angle * 10; //舵机的角度
+    int32_t angle_long = angle * 10; //舵机的角度
     // 角度
     requestPack.content[1] = angle_long & 0xFF;
     requestPack.content[2] = (angle_long >> 8) & 0xFF;
@@ -331,7 +330,7 @@ void FSUS_Protocol::sendSetAngleMTurnByVelocity(FSUS_SERVO_ID_T servoId, FSUS_SE
     requestPack.cmdId = FSUS_CMD_SET_ANGLE_MTURN_BY_VELOCITY; // 指令ID
     requestPack.content_size = 13;             // 内容长度
     requestPack.content[0]=servoId;            //舵机ID
-    long angle_long = angle * 10;              //舵机的角度
+    int32_t angle_long = angle * 10;              //舵机的角度
     uint16_t velocity_int = velocity * 10; // 舵机转速 单位0.1°/s
     // 角度
     requestPack.content[1] = angle_long & 0xFF;
@@ -364,7 +363,7 @@ void FSUS_Protocol::sendQueryAngleMTurn(FSUS_SERVO_ID_T servoId){
 // 接收角度查询指令(多圈模式)
 FSUS_STATUS FSUS_Protocol::recvQueryAngleMTurn(FSUS_SERVO_ID_T *servoId, FSUS_SERVO_ANGLE_T *angle){
     FSUS_STATUS status = recvPack();
-    long angleVal;
+    int32_t angleVal;
     byte* angleValPtr = (byte*)&angleVal;
     
     // 偶尔会出现校验和错误的情况, 临时允许
@@ -480,7 +479,7 @@ FSUS_STATUS FSUS_Protocol::recvReadData(FSUS_SERVO_ID_T *servoId, uint8_t *addre
         *address = responsePack.content[1]; // 获取地址位
         *contentLen = responsePack.content_size - 2; // 计算得到数据位的长度
         // 数据拷贝
-        for(int i=0; i<*contentLen; i++){
+        for(uint16_t i=0; i<*contentLen; i++){
             content[i] = responsePack.content[i+2];
         }
     }
@@ -493,7 +492,7 @@ void FSUS_Protocol::sendWriteData(FSUS_SERVO_ID_T servoId, uint8_t address, uint
     requestPack.content_size = 2+contentLen;
     requestPack.content[0] = servoId;
     requestPack.content[1] = address;
-    for(int i=0; i<contentLen; i++){
+    for(uint16_t i=0; i<contentLen; i++){
         requestPack.content[i+2] = content[i];
     }
     sendPack();

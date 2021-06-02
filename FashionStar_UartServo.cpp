@@ -348,7 +348,7 @@ bool FSUS_Servo::isStop(){
 
 /* 舵机等待 */
 void FSUS_Servo::wait(){
-    long t_start = millis();
+    int32_t t_start = millis();
     // 角度误差
     float dAngle = abs(this->targetRawAngle - this->curRawAngle);
     
