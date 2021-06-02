@@ -20,29 +20,23 @@
 // 软串口的配置
 #define SOFT_SERIAL_RX 6
 #define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
 SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+#define DEBUG_SERIAL softSerial
+#define DEBUG_SERIAL_BAUDRATE 4800
 #elif defined(ARDUINO_ARCH_ESP32)
+#define DEBUG_SERIAL Serial
 #define DEBUG_SERIAL_BAUDRATE 115200
 #endif 
 
-FSUS_Protocol protocol(BAUDRATE); //协议
+FSUS_Protocol protocol(BAUDRATE);       //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
 void setup(){
     protocol.init(); // 舵机通信协议初始化
     uservo.init(); // 串口总线舵机初始化
-
     // 打印例程信息
-#if defined(ARDUINO_ARCH_AVR)
-    softSerial.begin(SOFT_SERIAL_BAUDRATE);
-    softSerial.println("Start To Ping Servo\n"); // 打印日志
-#elif defined(ARDUINO_ARCH_ESP32)
-    Serial.begin(DEBUG_SERIAL_BAUDRATE);
-    Serial.println("Start To Ping Servo\n");
-#endif
-
-    
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE);
+    DEBUG_SERIAL.println("Start To Ping Servo\n");
 }
 
 void loop(){
@@ -54,11 +48,7 @@ void loop(){
         message += "offline";
     }
     // 调试串口初始化
-#if defined(ARDUINO_ARCH_AVR)
-    softSerial.println(message);
-#elif defined(ARDUINO_ARCH_ESP32)
-    Serial.println(message);
-#endif
+    DEBUG_SERIAL.println(message);
     // 等待1s
     delay(1000);
 }
