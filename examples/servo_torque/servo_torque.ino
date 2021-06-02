@@ -16,11 +16,9 @@
 FSUS_Protocol protocol; //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 void setup(){
-    // protocol.init(&Serial, BAUDRATE); // 通信协议初始化
-    protocol.init((Stream *)&Serial, BAUDRATE);
-
-    uservo.init(); //舵机角度初始化
-
+    protocol.init(); // 通信协议初始化
+    uservo.init(); //舵机初始
+    
     uservo.setTorque(true); // 开启扭力
     // uservo.setTorque(false); // 开启扭力
 }
