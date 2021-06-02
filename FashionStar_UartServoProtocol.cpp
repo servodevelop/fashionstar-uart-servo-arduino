@@ -37,10 +37,6 @@ void FSUS_Protocol::init(unsigned long baudrate){
 #elif defined(ARDUINO_ARCH_ESP32)
     Serial2.begin(baudrate);
     this->serial = &Serial2;
-
-    // HardwareSerial uservo_serial(2);
-    // uservo_serial.begin(baudrate);
-    // this->serial = &uservo_serial;
 #endif
 
 }
