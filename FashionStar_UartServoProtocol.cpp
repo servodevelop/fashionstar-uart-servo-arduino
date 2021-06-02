@@ -254,7 +254,8 @@ void FSUS_Protocol::sendQueryAngle(FSUS_SERVO_ID_T servoId){
 // 接收角度查询指令
 FSUS_STATUS FSUS_Protocol::recvQueryAngle(FSUS_SERVO_ID_T *servoId, FSUS_SERVO_ANGLE_T *angle){
     FSUS_STATUS status = recvPack();
-    int angleVal;
+    // int angleVal;
+    int16_t angleVal;
     byte* angleValPtr = (byte*)&angleVal;
     
     // angleVal = responsePack.content[1] + responsePack.content[2] << 8;
@@ -265,7 +266,7 @@ FSUS_STATUS FSUS_Protocol::recvQueryAngle(FSUS_SERVO_ID_T *servoId, FSUS_SERVO_A
         
         angleValPtr[0] = responsePack.content[1];
         angleValPtr[1] = responsePack.content[2];
-        (*angle) = 0.1*angleVal;
+        (*angle) = 0.1f*angleVal;
         // (*angle) = 0.1 * (int)(responsePack.content[1] | responsePack.content[2]<< 8);
     }
     responsePack.recv_status = status;

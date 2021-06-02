@@ -8,16 +8,13 @@
 #include "FashionStar_UartServoProtocol.h" // 串口总线舵机通信协议
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
-#if defined(ARDUINO_ARCH_AVR)
-#include <SoftwareSerial.h>
-#endif
-
-// 配置
+// 串口总线舵机配置
 #define SERVO_ID 0 //舵机ID号
 #define BAUDRATE 115200 // 波特率
 
+// 调试串口的配置
 #if defined(ARDUINO_ARCH_AVR)
-// 软串口的配置
+#include <SoftwareSerial.h>
 #define SOFT_SERIAL_RX 6
 #define SOFT_SERIAL_TX 7
 SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
