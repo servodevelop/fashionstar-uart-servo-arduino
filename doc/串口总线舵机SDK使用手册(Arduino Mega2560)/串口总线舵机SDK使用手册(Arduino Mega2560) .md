@@ -1,4 +1,4 @@
-# 串口总线舵机SDK使用手册(Arduino Uno)
+# 串口总线舵机SDK使用手册(Arduino Mega2560) 
 
 [toc]
 
@@ -6,7 +6,15 @@
 
 邮箱: kyle.xing@fashionstar.com.hk
 
-更新时间: 2020 / 04 / 23
+更新时间: 2021 / 07 / 15
+
+
+
+
+
+
+
+
 
 ## 安装串口总线舵机的Arduino库
 
@@ -22,67 +30,38 @@
 
 ## 演示例程的操作流程
 
-1. 将Arduino UNO与PC相连
-
-2. 断开Arduino UNO拓展版的外接电源的开关.
-
-   开关拨至`OFF`
-
-   ![](./image/外界电源开关.jpg)
-
+1. 接线 - Arduino Mega2560跟串口转接板UART接口
+   | Arduino Mega2560      | USB转TTL模块                |
+   | --------------------- | --------------------------- |
+   | D15(串口3 RX 接收端)  | Tx (USB转TTL模块的接收端)   |
+   | D14 (串口3 Tx 发送端) | Rx （USB转TTL模块的发送端） |
+   | GND                   | GND                         |
    
+   <img src="image/串口总线舵机SDK使用手册(Arduino Mega2560) /image-20210715150352273.png" alt="image-20210715150352273" style="zoom: 33%;" />
+   
+2. 接线 - Arduino Mega2560与PC 通过USB线相连接
 
-3. 在PC端打开Arduino IDE, 打开例程文件.
+3. 在PC端打开Arduino IDE, 打开FashionStar串口总线舵机的例程文件.
 
    [打开Arduino示例代码-流程演示.mp4](../../video/打开Arduino示例代码-流程演示.mp4)
 
-4. 编译并烧录固件至Arduino UNO
+   ![image-20210715150718874](image/串口总线舵机SDK使用手册(Arduino Mega2560) /image-20210715150718874.png)
 
-5. 打开Arduino UNO拓展板的外接电源的开关
+4. 选择开发板型号为Arduino Mega2560, 选择端口号
 
-   开关拨至`ON`
+   ![image-20210715150003539](image/串口总线舵机SDK使用手册(Arduino Mega2560) /image-20210715150003539.png)
 
-6. 按下Arduino UNO拓展版上的`RESET`按键
+5. 给串口舵机转接板供电 ， 电压7.2V.
+
+6. 编译并烧录固件
+
+   ![image-20210715150624871](image/串口总线舵机SDK使用手册(Arduino Mega2560) /image-20210715150624871.png)
 
 7. 查看日志输出
 
+   ![image-20210715150813524](image/串口总线舵机SDK使用手册(Arduino Mega2560) /image-20210715150813524.png)
 
-
-
-
-
-## 软串口日志输出
-
-1. 安装USB转TTL模块的驱动程序.
-
-2. 将Arduino跟USB转TTL模块通过杜邦线相连
-
-   | Arduino UNO             | USB转TTL模块                |
-   | ----------------------- | --------------------------- |
-   | pin 6 (软串口RX 接收端) | Tx (USB转TTL模块的接收端)   |
-   | pin7 (软串口Tx 发送端)  | Rx （USB转TTL模块的发送端） |
-   | GND                     | GND                         |
-
-   *实物图*
-
-   ![](./image/Arduino软串口USB转TTL模块实物图.jpg)
-
-3. 将USB转TTL模块插入到电脑的USB口上
-
-4. 打开串口调试助手, 选择USB转TTL模块的端口号, 配置如下
-
-   ![](./image/串口调试助手的配置.png)
-
-   点击`Open` ,  打开端口.
-
-5. 打开`Arduino IDE > Examples > FashionStar_UartServo >  software_serial` 
-
-   将例程烧录到Arduino UNO 里面.
-
-6. 查看运行效果 
-
-   ![](./image/test_software_serial.png)
-
+   
 
 
 ## 舵机对象的创建与初始化
@@ -154,41 +133,52 @@ bool isOnline = uservo.ping(); // 舵机通讯检测
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/04/23
+ * 更新时间: 2021/06/02
  **/
-#include <SoftwareSerial.h>
 #include "FashionStar_UartServoProtocol.h" // 串口总线舵机通信协议
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
-// 软串口的配置
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
-
-// 配置
+// 串口总线舵机配置
 #define SERVO_ID 0 //舵机ID号
 #define BAUDRATE 115200 // 波特率
 
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
-FSUS_Protocol protocol(BAUDRATE); //协议
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
+FSUS_Protocol protocol(BAUDRATE);       //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
 void setup(){
-    softSerial.begin(SOFT_SERIAL_BAUDRATE);
     protocol.init(); // 舵机通信协议初始化
     uservo.init(); // 串口总线舵机初始化
-
-    softSerial.println("Start To Ping Servo\n"); // 打印日志
+    // 打印例程信息
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE);
+    DEBUG_SERIAL.println("Start To Ping Servo\n");
 }
 
 void loop(){
     bool isOnline = uservo.ping(); // 舵机通讯检测
-    String message = "servo #"+String(uservo.servoId,DEC); // 日志输出
+    String message = "servo #"+String(uservo.servoId,DEC) + " is ";  // 日志输出
     if(isOnline){
-        softSerial.println(message+" is online.");
+        message += "online";
     }else{
-        softSerial.println(message+" is offline.");
+        message += "offline";
     }
+    // 调试串口初始化
+    DEBUG_SERIAL.println(message);
     // 等待1s
     delay(1000);
 }
@@ -250,40 +240,49 @@ uservo.setDamping(DAMPING_POWER);
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/04/23
+ * 更新时间: 2021/06/02
  **/
-#include <SoftwareSerial.h>
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
-// 软串口的配置
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
-
-// 配置参数
-#define BAUDRATE 115200 // 波特率
-
+// 串口总线舵机配置参数
 #define SERVO_ID 0 //舵机ID号
+#define BAUDRATE 115200 // 波特率
 #define DAMPING_POWER 800 // 阻尼模式下的功率(单位mW) 500,800,1000
 
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
 void setup(){
-    softSerial.begin(SOFT_SERIAL_BAUDRATE);
+    
     protocol.init(); // 通信协议初始化
     uservo.init(); // 舵机初始化
-    
-    softSerial.println("Set Servo Mode To Dammping");
+    // 打印日志
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE);
+    DEBUG_SERIAL.println("Set Servo Mode To Dammping");
+    // 设置电机的阻尼系数
     uservo.setDamping(DAMPING_POWER);
 }
 
 void loop(){
     // TODO;
 }
-
 
 ```
 
@@ -341,43 +340,55 @@ uservo.curAngle
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/04/23
+ * 更新时间: 2021/06/02
  **/
-#include <SoftwareSerial.h>
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
-// 软串口的配置
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
-
-// 配置参数
-#define BAUDRATE 115200 // 波特率
-
+// 串口总线舵机配置
 #define SERVO_ID 0 //舵机ID号
 #define DAMPING_POWER 800 // 阻尼模式下的功率(单位mW) 500,800,1000
+#define BAUDRATE 115200 // 波特率
 
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
+
+
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
-void setup(){
-    softSerial.begin(SOFT_SERIAL_BAUDRATE);
-    protocol.init(); // 通信协议初始化
-    
-    uservo.init(); //舵机角度初始化
-    uservo.setDamping(DAMPING_POWER);
 
-    softSerial.println("Query Servo Angle");
+void setup(){
+    protocol.init();                    // 通信协议初始化
+    uservo.init();                      //舵机角度初始化
+    uservo.setDamping(DAMPING_POWER);   // 舵机设置为阻尼模式
+    // 打印例程信息
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE);
+    DEBUG_SERIAL.println("Query Servo Angle\n");    
 }
 
 void loop(){
     // 舵机角度查询 (更新角度)
-    uservo.queryAngle(); 
+    uservo.queryRawAngle(); 
     // 日志输出
-    String message = "Status Code: " + String(uservo.protocol->responsePack.recv_status, DEC) + " servo #"+String(uservo.servoId, DEC) + " , Current Angle = "+String(uservo.curAngle, 1)+"°";
-    softSerial.println(message);
+    String message = "Status Code: " + String(uservo.protocol->responsePack.recv_status, DEC) + " servo #"+String(uservo.servoId, DEC) + " , Current Angle = "+String(uservo.curRawAngle, 1)+" deg";
+    DEBUG_SERIAL.println(message);
+    // 等待1s
+    delay(1000);
 }
 ```
 
@@ -479,7 +490,7 @@ void FSUS_Servo::wheelRunNCircle(uint8_t is_cw, uint16_t circle_num)
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/07/6
+ * 更新时间: 2021/06/02
  */
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
@@ -672,22 +683,32 @@ void FSUS_Servo::setAngleRange(FSUS_SERVO_ANGLE_T minAngle, FSUS_SERVO_ANGLE_T m
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2021/02/22
+ * 更新时间: 2021/06/02
  */
-#include <SoftwareSerial.h>
+
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
-// 软串口的配置
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
-
-// 配置参数
-#define BAUDRATE 115200 // 波特率
+// 串口总线舵机配置参数
 #define SERVO_ID 0 //舵机ID号
+#define BAUDRATE 115200 // 波特率
 
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
@@ -699,35 +720,36 @@ float velocity;         // 目标转速 单位°/s
 /* 等待并报告当前的角度*/
 void waitAndReport(){
     uservo.wait();          // 等待舵机旋转到目标角度
-    softSerial.println("Real Angle = " + String(uservo.curRawAngle, 1) + " Target Angle = "+String(uservo.targetRawAngle, 1));
+    DEBUG_SERIAL.println("Real Angle = " + String(uservo.curRawAngle, 1) + " Target Angle = "+String(uservo.targetRawAngle, 1));
     delay(2000); // 暂停2s
 
 }
 
 void setup(){
-    softSerial.begin(SOFT_SERIAL_BAUDRATE); // 初始化软串口的波特率
     protocol.init(); // 通信协议初始化
     uservo.init(); //舵机角度初始化
-    softSerial.println("Set Servo Angle");
+    // 打印例程信息
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE); // 初始化软串口的波特率
+    DEBUG_SERIAL.println("Set Servo Angle");
 }
 
 void loop(){
-    softSerial.println("Set Angle = 90°");
+    DEBUG_SERIAL.println("Set Angle = 90°");
     uservo.setRawAngle(90.0);  // 设置舵机的角度
     waitAndReport();
 
-    softSerial.println("Set Angle = -90°");
+    DEBUG_SERIAL.println("Set Angle = -90°");
     uservo.setRawAngle(-90);
     waitAndReport();
 
-    softSerial.println("Set Angle = 90° - Set Interval = 500ms");
+    DEBUG_SERIAL.println("Set Angle = 90° - Set Interval = 500ms");
     interval = 1000;
     t_acc = 100;
     t_dec = 100;
     uservo.setRawAngleByInterval(90, interval, t_acc, t_dec, 0);
     waitAndReport();
 
-    softSerial.println("Set Angle = -90° - Set Velocity = 200°/s");
+    DEBUG_SERIAL.println("Set Angle = -90° - Set Velocity = 200°/s");
     velocity = 200.0;
     t_acc = 100;
     t_dec = 100;
@@ -784,43 +806,53 @@ void FSUS_Servo::wait()
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/04/23
+ * 更新时间: 2021/06/02
  */
-#include <SoftwareSerial.h>
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
-// 软串口的配置
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
-
-// 配置参数
-#define BAUDRATE 115200 // 波特率
+// 串口总线舵机配置参数
 #define SERVO_ID 0 //舵机ID号
+#define BAUDRATE 115200 // 波特率
 
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
 void setup(){
-    softSerial.begin(SOFT_SERIAL_BAUDRATE); // 初始化软串口的波特率
+    
     protocol.init(); // 通信协议初始化
     uservo.init(); //舵机初始化
-
-    softSerial.println("Test Wait");
+    // 打印例程信息
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE);
+    DEBUG_SERIAL.println("Test Wait");
 }
 
 void loop(){
-    softSerial.println("Set Angle = 90.0");
+    DEBUG_SERIAL.println("Set Angle = 90.0");
     uservo.setAngle(90.0); // 设置舵机的角度
     uservo.wait();
-    softSerial.println("Real Angle = "+String(uservo.curAngle, 2));
+    DEBUG_SERIAL.println("Real Angle = "+String(uservo.curAngle, 2));
      
-    softSerial.println("Set Angle = -90.0");
+    DEBUG_SERIAL.println("Set Angle = -90.0");
     uservo.setAngle(-90);
     uservo.wait();
-    softSerial.println("Real Angle = "+String(uservo.curAngle, 2));
+    DEBUG_SERIAL.println("Real Angle = "+String(uservo.curAngle, 2));
 }
 ```
 
@@ -947,22 +979,33 @@ void FSUS_Servo::setRawAngleMTurnByVelocity(FSUS_SERVO_ANGLE_T rawAngle, FSUS_SE
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2021/02/22
+ * 更新时间: 2021/06/02
  */
-#include <SoftwareSerial.h>
+
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
-// 软串口的配置
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
 
-// 配置参数
-#define BAUDRATE 115200 // 波特率
+// 串口总线舵机配置参数
 #define SERVO_ID 0 //舵机ID号
+#define BAUDRATE 115200 // 波特率
 
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
@@ -974,34 +1017,35 @@ float velocity;         // 目标转速 单位°/s
 /* 等待并报告当前的角度*/
 void waitAndReport(){
     uservo.wait();          // 等待舵机旋转到目标角度
-    softSerial.println("Real Angle = " + String(uservo.curRawAngle, 1) + " Target Angle = "+String(uservo.targetRawAngle, 1));
+    DEBUG_SERIAL.println("Real Angle = " + String(uservo.curRawAngle, 1) + " Target Angle = "+String(uservo.targetRawAngle, 1));
     delay(2000); // 暂停2s
 }
 
 void setup(){
-    softSerial.begin(SOFT_SERIAL_BAUDRATE); // 初始化软串口的波特率
     protocol.init(); // 通信协议初始化
     uservo.init(); //舵机角度初始化
-    softSerial.println("Set Servo Angle");
+    // 打印例程信息
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE); // 初始化软串口的波特率
+    DEBUG_SERIAL.println("Set Servo Angle");
 }
 
 void loop(){
-    softSerial.println("Set Angle = 900°");
+    DEBUG_SERIAL.println("Set Angle = 900°");
     uservo.setRawAngleMTurn(900.0);  // 设置舵机的角度
     waitAndReport();
 
-    softSerial.println("Set Angle = -900.0°");
+    DEBUG_SERIAL.println("Set Angle = -900.0°");
     uservo.setRawAngleMTurn(-900.0);
     waitAndReport();
 
-    softSerial.println("Set Angle = 900° - Set Interval = 10s");
+    DEBUG_SERIAL.println("Set Angle = 900° - Set Interval = 10s");
     interval = 10000;
     t_acc = 100;
     t_dec = 100;
     uservo.setRawAngleMTurnByInterval(900, interval, t_acc, t_dec, 0);
     waitAndReport();
 
-    softSerial.println("Set Angle = -900° - Set Velocity = 200°/s");
+    DEBUG_SERIAL.println("Set Angle = -900° - Set Velocity = 200°/s");
     velocity = 200.0;
     t_acc = 100;
     t_dec = 100;
@@ -1064,7 +1108,7 @@ uservo.setTorque(true); // 开启扭力
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/04/23
+ * 更新时间: 2021/06/02
  */
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
@@ -1073,12 +1117,12 @@ uservo.setTorque(true); // 开启扭力
 #define BAUDRATE 115200 // 波特率
 #define SERVO_ID 0 //舵机ID号
 
-FSUS_Protocol protocol(BAUDRATE); //协议
+FSUS_Protocol protocol; //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 void setup(){
     protocol.init(); // 通信协议初始化
-    uservo.init(); //舵机角度初始化
-
+    uservo.init(); //舵机初始
+    
     uservo.setTorque(true); // 开启扭力
     // uservo.setTorque(false); // 开启扭力
 }
@@ -1207,21 +1251,16 @@ FSUS_SERVO_ANGLE_T FSUS_Servo::angleRaw2Real(FSUS_SERVO_ANGLE_T rawAngle);
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/04/23
+ * 更新时间: 2021/06/02
  */
 
-#include <SoftwareSerial.h>
 #include "FashionStar_UartServoProtocol.h"
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
 
-// 软串口的配置
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
 
-// 配置参数
-#define BAUDRATE 115200 // 波特率
+// 串口总线舵机配置参数
 #define SERVO_ID 0 //舵机ID号
+#define BAUDRATE 115200 // 波特率
 
 // 设置舵机的标定点
 // 样本1
@@ -1231,33 +1270,48 @@ FSUS_SERVO_ANGLE_T FSUS_Servo::angleRaw2Real(FSUS_SERVO_ANGLE_T rawAngle);
 #define SERVO_REAL_ANGLE_B -90 // 舵机真实角度
 #define SERVO_RAW_ANGLE_B 91.9 // 舵机原始角度
 
-// 创建软串口
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX);
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
 void setup(){
-    softSerial.begin(SOFT_SERIAL_BAUDRATE); // 初始化软串口的波特率
-
     protocol.init(); // 通信协议初始化
-    softSerial.println("Set Servo Angle");
     uservo.init(); //舵机角度初始化
+    // 调试串口初始化
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE); // 初始化软串口的波特率
+    DEBUG_SERIAL.println("Set Servo Angle");
     // 输入舵机标定数据
     uservo.calibration(
         SERVO_RAW_ANGLE_A,SERVO_REAL_ANGLE_A,\
         SERVO_RAW_ANGLE_B,SERVO_REAL_ANGLE_B);
+    
     // 打印舵机标定数据
-    softSerial.println("kAngleReal2Raw = "+String(uservo.kAngleReal2Raw,2) + \
+    DEBUG_SERIAL.println("kAngleReal2Raw = "+String(uservo.kAngleReal2Raw,2) + \
         "; bAngleReal2Raw = " + String(uservo.bAngleReal2Raw, 2));
 }
 
 void loop(){
-    softSerial.println("Set Angle = 90°");
+    DEBUG_SERIAL.println("Set Angle = 90°");
     uservo.setAngle(90.0); // 设置舵机的角度
     uservo.wait();
     delay(2000);
 
-    softSerial.println("Set Angle = -90°");
+    DEBUG_SERIAL.println("Set Angle = -90°");
     uservo.setAngle(-90);
     uservo.wait();
     delay(2000);
@@ -1314,22 +1368,31 @@ void FSUS_Servo::setSpeed(FSUS_SERVO_SPEED_T speed)
  * --------------------------
  * 作者: 阿凯|Kyle
  * 邮箱: kyle.xing@fashionstar.com.hk
- * 更新时间: 2020/11/14
+ * 更新时间: 2021/06/02
  **/
-#include <SoftwareSerial.h>
 #include "FashionStar_UartServoProtocol.h" // 串口总线舵机通信协议
 #include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
-
-// 软串口的配置
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-#define SOFT_SERIAL_BAUDRATE 4800
 
 // 配置
 #define SERVO_ID 4 //舵机ID号
 #define BAUDRATE 115200 // 波特率
 
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机
 
@@ -1340,11 +1403,13 @@ uint16_t power;         // 功率 mW
 uint16_t temperature;   // 温度 ℃
 
 void setup(){
-    softSerial.begin(SOFT_SERIAL_BAUDRATE);
+    
     protocol.init(); // 舵机通信协议初始化
     uservo.init(); // 串口总线舵机初始化
-
-    softSerial.println("Start To Test Servo Data Read \n"); // 打印日志
+    // 打印例程信息
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE);
+    DEBUG_SERIAL.println("Start To Test Servo Data Read \n"); // 打印日志
+    
     uservo.setAngle(-25.0,  1000, 200); // 设置舵机角度(限制功率)
 }
 
@@ -1353,13 +1418,13 @@ void loop(){
     current = uservo.queryCurrent();
     power = uservo.queryPower();
     temperature = uservo.queryTemperature();
-    softSerial.println("voltage: "+String((float)voltage, 1)+" mV\n");
+    DEBUG_SERIAL.println("voltage: "+String((float)voltage, 1)+" mV\n");
     delay(100);
-    softSerial.println("current: "+String((float)current, 1)+" mA\n");
+    DEBUG_SERIAL.println("current: "+String((float)current, 1)+" mA\n");
     delay(100);
-    softSerial.println("power: "+String((float)power, 1)+" mW\n");
+    DEBUG_SERIAL.println("power: "+String((float)power, 1)+" mW\n");
     delay(100);
-    softSerial.println("temperature: "+String((float)temperature, 1)+" Celsius\n");
+    DEBUG_SERIAL.println("temperature: "+String((float)temperature, 1)+" Celsius\n");
     delay(1000);
 }
 ```
