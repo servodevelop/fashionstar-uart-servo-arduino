@@ -15,17 +15,20 @@
 #define DAMPING_POWER 800 // 阻尼模式下的功率(单位mW) 500,800,1000
 
 // 调试串口的配置
-#if defined(ARDUINO_ARCH_AVR)
-#include <SoftwareSerial.h>
-#define SOFT_SERIAL_RX 6
-#define SOFT_SERIAL_TX 7
-SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
-#define DEBUG_SERIAL softSerial
-#define DEBUG_SERIAL_BAUDRATE 4800
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
 #elif defined(ARDUINO_ARCH_ESP32)
-#define DEBUG_SERIAL Serial
-#define DEBUG_SERIAL_BAUDRATE 115200
-#endif
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
 
 FSUS_Protocol protocol(BAUDRATE); //协议
 FSUS_Servo uservo(SERVO_ID, &protocol); // 创建舵机

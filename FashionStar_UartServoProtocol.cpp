@@ -16,9 +16,12 @@ FSUS_Protocol::FSUS_Protocol(){
 }
 
 void FSUS_Protocol::init(){
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(ARDUINO_AVR_UNO)
     Serial.begin(baudrate); // 设置波特率
     this->serial = &Serial; // 硬件串口指针
+#elif defined(ARDUINO_AVR_MEGA2560)
+    Serial3.begin(baudrate); // 设置波特率
+    this->serial = &Serial3; // 硬件串口指针
 #elif defined(ARDUINO_ARCH_ESP32)
     // Serial2初始化
     // API Serial2.begin(baud-rate, protocol, RX pin, TX pin);
@@ -31,9 +34,12 @@ void FSUS_Protocol::init(){
 
 void FSUS_Protocol::init(uint32_t baudrate){
     this->baudrate = baudrate;
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(ARDUINO_AVR_UNO)
     Serial.begin(this->baudrate);
     this->serial = &Serial;
+#elif defined(ARDUINO_AVR_MEGA2560)
+    Serial3.begin(baudrate); // 设置波特率
+    this->serial = &Serial3; // 硬件串口指针
 #elif defined(ARDUINO_ARCH_ESP32)
     Serial2.begin(baudrate);
     this->serial = &Serial2;
@@ -43,8 +49,10 @@ void FSUS_Protocol::init(uint32_t baudrate){
 
 void FSUS_Protocol::init(Stream * serial, uint32_t baudrate){
     this->baudrate = baudrate;
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(ARDUINO_AVR_UNO)
     Serial.begin(this->baudrate);
+#elif defined(ARDUINO_AVR_MEGA2560)
+    Serial3.begin(baudrate); // 设置波特率
 #elif defined(ARDUINO_ARCH_ESP32)
     Serial2.begin(this->baudrate);
 #endif
