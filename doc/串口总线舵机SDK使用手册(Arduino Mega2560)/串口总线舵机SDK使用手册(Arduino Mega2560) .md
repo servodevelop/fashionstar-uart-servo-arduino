@@ -113,7 +113,7 @@ void setup(){
 
 
 
-## 舵机通讯检测
+## :star:舵机通讯检测
 
 ### API-`ping`
 
@@ -203,7 +203,7 @@ servo #0 is online.
 
 
 
-## 舵机阻尼模式
+## :star:舵机阻尼模式
 
 ### API-`setDamping`
 
@@ -294,7 +294,7 @@ Set Servo Mode To Dammping
 
 
 
-## 舵机角度查询
+## :star:舵机角度查询
 
 ### API-`queryAngle`
 
@@ -554,7 +554,7 @@ void loop(){
 
 
 
-## 设置舵机角度
+## :star:设置舵机角度
 
 ### API-`setAngle`
 
@@ -775,7 +775,7 @@ Real Angle = -89.6 Target Angle = -90.0
 
 
 
-## 舵机阻塞式等待
+## :star:舵机阻塞式等待
 
 ### API-`wait`
 
@@ -795,7 +795,7 @@ void FSUS_Servo::wait()
 
 <无>
 
-### 例程源码
+### 例程源码-等待单个舵机执行完成动作
 
 `servo_wait.ino`
 
@@ -876,6 +876,99 @@ Real Angle = 89.80
 Set Angle = -90.0
 Real Angle = -89.00
 ```
+
+
+
+### 例程源码-等待多个舵机完成任务
+
+`servo_multi_servo_control.ino`
+
+```cpp
+/* 
+ * 多个舵机控制示例
+ * --------------------------
+ * 作者: 阿凯|Kyle
+ * 邮箱: kyle.xing@fashionstar.com.hk
+ * 更新时间: 2021/07/016
+ */
+#include "FashionStar_UartServoProtocol.h"
+#include "FashionStar_UartServo.h" // Fashion Star串口总线舵机的依赖
+
+// 串口总线舵机配置参数
+#define SERVO0 0 // 舵机0的ID号
+#define SERVO1 1 // 舵机1的ID号
+#define BAUDRATE 115200 // 波特率
+
+// 调试串口的配置
+#if defined(ARDUINO_AVR_UNO)
+    #include <SoftwareSerial.h>
+    #define SOFT_SERIAL_RX 6
+    #define SOFT_SERIAL_TX 7
+    SoftwareSerial softSerial(SOFT_SERIAL_RX, SOFT_SERIAL_TX); // 创建软串口
+    #define DEBUG_SERIAL softSerial
+    #define DEBUG_SERIAL_BAUDRATE 4800
+#elif defined(ARDUINO_AVR_MEGA2560)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#elif defined(ARDUINO_ARCH_ESP32)
+    #define DEBUG_SERIAL Serial
+    #define DEBUG_SERIAL_BAUDRATE 115200
+#endif 
+
+FSUS_Protocol protocol(BAUDRATE); //协议
+FSUS_Servo servo0(SERVO0, &protocol); // 创建舵机
+FSUS_Servo servo1(SERVO1, &protocol); // 创建舵机
+
+
+/* 等待所有的舵机完成动作 */
+void wait_all_servo_done(){
+    servo0.wait();
+    servo1.wait();
+}
+
+void setup(){
+    protocol.init();    // 通信协议初始化
+    servo0.init();      // 舵机0初始化
+    servo1.init();      // 舵机1初始化
+    // 打印例程信息
+    DEBUG_SERIAL.begin(DEBUG_SERIAL_BAUDRATE);
+    DEBUG_SERIAL.println("Test Multi Servo Control");
+}
+
+void loop(){
+    DEBUG_SERIAL.println("Servo0 = 45.0, Servo1 = 30.0");
+    servo0.setRawAngle(45.0, 1000);         // 设置舵机0的角度
+    servo1.setRawAngle(30.0, 1000);         // 设置舵机1的角度
+    wait_all_servo_done();                  // 等待动作完成
+    delay(2000);                            // 延时2s
+
+    
+    DEBUG_SERIAL.println("Servo0 = -45.0, Servo1 = -30.0");
+    servo0.setRawAngle(-45, 1000);          // 设置舵机0的角度
+    servo1.setRawAngle(-30.0, 1000);        // 设置舵机1的角度
+    wait_all_servo_done();                  // 等待动作完成
+    delay(2000);                            // 延时2s
+}
+```
+
+**输出日志**
+
+```bash
+Test Multi Servo Control
+Servo0 = 45.0, Servo1 = 30.0
+Servo0 = -45.0, Servo1 = -30.0
+Servo0 = 45.0, Servo1 = 30.0
+Servo0 = -45.0, Servo1 = -30.0
+Servo0 = 45.0, Servo1 = 30.0
+Servo0 = -45.0, Servo1 = -30.0
+Servo0 = 45.0, Servo1 = 30.0
+Servo0 = -45.0, Servo1 = -30.0
+Servo0 = 45.0, Servo1 = 30.0
+Servo0 = -45.0, Servo1 = -30.0
+Servo0 = 45.0, Servo1 = 30.0
+```
+
+
 
 
 
